@@ -24,12 +24,12 @@ TGBot RSS 是一个基于 Telegram Bot 的 RSS 订阅工具，支持关键词过
 
 配置说明：
 - `BotToken`: Telegram Bot 的 API 令牌，从 @BotFather 获取
-- `ADMINIDS`: 管理员用户 ID，设置为 0 表示所有用户可用
-- `Cycletime`: RSS 检查周期，单位为分钟
+- `ADMINIDS`: 管理员用户 ID，设置为 0 表示所有用户可用，自用建议设置为自己UID如：`60xxxxxxxx`
+- `Cycletime`: RSS 检查周期，单位为分钟,建议为1
 - `Debug`: 是否开启调试模式
-- `ProxyURL`: 代理服务器 URL，例如 `http://127.0.0.1:7890`
-- `Pushinfo`: 额外推送接口 URL
-
+- `ProxyURL`: 代理服务器 URL，例如 `http://127.0.0.1:7890`，默认为空则不使用代理
+- `Pushinfo`: 额外推送接口 URL，可设置为微信机器人之类的消息推送接口如此格式`https://xxxx.xxxxx.xxx/send_msg?access_token=xxxxxxx&msgtype=xxxx&touser=xxxxx&content=`
+此接口将与TGBot收到同等消息，可实现TG控制Bot关键词，其他链接，接收识别到关键词的帖子
 ## 使用指南
 
 ### 基本命令
@@ -75,16 +75,9 @@ TGBot RSS 使用 SQLite 数据库存储数据，包含以下表：
 
 ## 常见问题
 
-**Q: 如何获取 Telegram Bot Token?**  
-A: 在 Telegram 中联系 @BotFather，按照指引创建新机器人并获取 Token。
-
-**Q: 如何设置代理?**  
-A: 在 config.json 中设置 ProxyURL 字段，例如 `"ProxyURL": "http://127.0.0.1:7890"`。
-
-**Q: 为什么我添加了关键词但没有收到推送?**  
-A: 请检查：1) RSS 源是否有更新；2) 关键词是否匹配；3) 是否有屏蔽词被触发。
+如存在问题，打开debug，再issue中反馈
 
 ## 联系方式
 
-- 问题反馈：t.me/Pushchannl
+- 问题反馈：[t.me/IonMagic](https://t.me/IonMagic)
 - 项目仓库：https://github.com/IonRh/TGBot_RSS 
