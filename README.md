@@ -50,6 +50,17 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
 - `ProxyURL`: 代理服务器 URL，例如 `http://127.0.0.1:7890`，默认为空则不使用代理
 - `Pushinfo`: 额外推送接口 URL，可设置为微信机器人之类的消息推送接口如此格式`https://xxxx.xxxxx.xxx/send_msg?access_token=xxxxxxx&msgtype=xxxx&touser=xxxxx&content=`
 此接口将与TGBot收到同等消息，可实现TG控制Bot关键词，其他链接，接收识别到关键词的帖子
+
+```
+{
+  "BotToken": "57xxxxxxxxxx:xxxxxxxxxxxxxxxxsvjM",
+  "ADMINIDS": 602xxxxxxx,
+  "Cycletime": 1,
+  "Debug": false,
+  "ProxyURL": "http://127.0.0.1:7890"
+  "Pushinfo": "https://xxxx.xxxxx.xxx/send_msg?access_token=xxxxxxx&msgtype=xxxx&touser=xxxxx&content="
+}
+```
 ## 使用指南
 
 ### 基本命令
