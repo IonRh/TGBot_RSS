@@ -20,6 +20,10 @@ TGBot RSS 是一个基于 Telegram Bot 的 RSS 订阅工具，支持关键词过
 - 🔗 **HTML 支持**：保留 Telegram 支持的 HTML 标签格式
 - 🔒 **代理支持**：可配置代理服务器访问被墙的 RSS 源
 
+| 主面板   | 推送样式 | 关于    |
+|--------|------|---------|
+| ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2afc6ebcf12db6f36af25877e7e24f72.png)   | ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20225016.png)   | ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20223327.png)   |
+
 ### 安装步骤
 
 1. 执行：
@@ -33,7 +37,7 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
 4. 后台运行可执行文件 `nohup ./TGBot_RSS > /dev/null 2>&1 &`
 
 
-配置说明：
+### 配置说明：
 - `BotToken`: Telegram Bot 的 API 令牌，从 @BotFather 获取
 - `ADMINIDS`: 管理员用户 ID，设置为 0 表示所有用户可用，自用建议设置为自己UID如：`60xxxxxxxx`
 - `Cycletime`: RSS 检查周期，单位为分钟,建议为1
@@ -53,7 +57,7 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
 1. 在主菜单中点击 "➕ 添加订阅"
 2. 按照格式输入 RSS 信息：`URL 名称 TG频道用0常规用1`
    - 例如：`https://example.com/feed 科技新闻 0`
-
+![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20223402.png)
 ### 添加关键词
 
 1. 在主菜单中点击 "📝 添加关键词"
@@ -62,7 +66,7 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
    - 普通关键词：`科技`
    - 通配符匹配：`科技*新闻`（匹配"科技最新新闻"等）
    - 屏蔽关键词：`-广告`（屏蔽包含"广告"的内容）
-
+![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20223348.png)
 ### 查看和删除
 
 - 点击 "📋 查看关键词" 或 "📰 查看订阅" 可以查看已添加的内容
