@@ -90,8 +90,8 @@ TGBot RSS 使用 SQLite 数据库存储数据，包含以下表：
 
 ## 常见问题
 
-如存在问题，打开debug，再issue中反馈
-
+- 如存在问题，打开debug，再issue中反馈
+- 暂不开源，无任何后门，挖矿，等危害计算机行为，可抓包获取外连网址。
 ## 联系方式
 
 - 问题反馈：[t.me/IonMagic](https://t.me/IonMagic)
