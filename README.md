@@ -9,7 +9,7 @@
 
 TGBot RSS 是一个基于 Telegram Bot 的 RSS 订阅工具，支持关键词过滤、多用户订阅和自定义推送格式。通过 TGBot RSS，你可以轻松获取感兴趣的 RSS 内容，并通过 Telegram 接收实时推送。
 
-长期维护：https://t.me/JK_550w_bot
+长期维护推送Bot：https://t.me/JK_550w_bot
 
 交流群：https://t.me/IonMagic
 
