@@ -1,0 +1,8 @@
+{
+  "BotToken": "YOUR_BOT_TOKEN_HERE",
+  "ADMINIDS": 0,
+  "Cycletime": 1,
+  "Debug": false,
+  "ProxyURL": "",
+  "Pushinfo": ""
+}
