@@ -57,7 +57,7 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
   "ADMINIDS": 602xxxxxxx,
   "Cycletime": 1,
   "Debug": false,
-  "ProxyURL": "http://127.0.0.1:7890"
+  "ProxyURL": "http://127.0.0.1:7890",
   "Pushinfo": "https://xxxx.xxxxx.xxx/send_msg?access_token=xxxxxxx&msgtype=xxxx&touser=xxxxx&content="
 }
 ```
