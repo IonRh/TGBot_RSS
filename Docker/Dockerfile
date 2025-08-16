@@ -1,7 +1,7 @@
 FROM alpine:3.20
 RUN apk add --no-cache curl bash sed busybox
 WORKDIR /root
-RUN ll-a && mkdir /app && cd /app && curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/TGBot_RSS.sh | bash
+RUN ls && mkdir /app && cd /app && curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/TGBot_RSS.sh | bash
 COPY Docker/main.sh /app/main.sh
 RUN chmod +x /app/main.sh && export TZ='Asia/Shanghai'
 # 校准时钟
