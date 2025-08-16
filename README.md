@@ -29,6 +29,32 @@ TGBot RSS 是一个基于 Telegram Bot 的 RSS 订阅工具，支持关键词过
 |--------|------|---------|
 | ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2afc6ebcf12db6f36af25877e7e24f72.png)   | ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20225016.png)   | ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20223327.png)   |
 
+### Docker运行
+
+- `BotToken`: Telegram Bot 的 API 令牌，从 @BotFather 获取
+- `ADMINIDS`: 管理员用户 ID，设置为 0 表示所有用户可用，自用建议设置为自己UID如：`60xxxxxxxx`
+- `Cycletime`: RSS 检查周期，单位为分钟,建议为1
+- `Debug`: 是否开启调试模式
+- `ProxyURL`: 代理服务器 URL，例如 `http://127.0.0.1:7890`，默认为空则不使用代理
+- `Pushinfo`: 额外推送接口 URL，可设置为微信机器人之类的消息推送接口如此格式`https://xxxx.xxxxx.xxx/send_msg?access_token=xxxxxxx&msgtype=xxxx&touser=xxxxx&content=`
+此接口将与TGBot收到同等消息，可实现TG控制Bot关键词，其他链接，接收识别到关键词的帖子
+
+```
+docker run -d \
+  --name TGBot_RSS \
+  -e BotToken="57xxxxxxxxxx:xxxxxxxxxxxxxxxxsvjM" \
+  -e ADMINIDS="602xxxxxxx" \
+  -e Cycletime="1" \
+  -e Debug="false" \
+  -e ProxyURL="http://127.0.0.1:7890" \
+  -e Pushinfo="https://xxxx.xxxxx.xxx/send_msg?access_token=xxxxxxx&msgtype=xxxx&touser=xxxxx&content=" \
+  -e TZ="Asia/Shanghai" \
+  -v "$(pwd)/TGBot_RSS:/root/" \
+  kwxos/tgbot-rss:latest
+```
+
+免费云平台也可运行，镜像`kwxos/tgbot-rss:latest`,只需要在环境变量中，填写上面的变量即可执行，如环境变量BotToken对应的值57xxxxxxxxxx:xxxxxxxxxxxxxxxxsvjM
+
 ### 安装步骤
 
 1. 执行：
