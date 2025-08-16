@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM frolvlad/alpine-glibc:latest
 RUN apk add --no-cache curl bash sed busybox
 WORKDIR /root
 RUN ls && mkdir /app && cd /app && curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/TGBot_RSS.sh | bash
