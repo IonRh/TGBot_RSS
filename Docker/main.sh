@@ -2,10 +2,10 @@
 
 export TZ='Asia/Shanghai'
 
-# 检查/root是否有文件
-if [ "$(ls -A /root/)" ]; then
-	# 有文件则执行TGBot_RSS
-	cd /root && ./TGBot_RSS > /dev/null 2>&1 &
+# 检查/root是否有config.json文件
+if [ -f /root/config.json ]; then
+    # 有文件则执行TGBot_RSS
+    cd /root && ./TGBot_RSS > /dev/null 2>&1 &
 else
 	# 无文件则移动/app/到/root
 	mv /app/config.json /root/
