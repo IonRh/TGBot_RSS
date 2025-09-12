@@ -139,4 +139,12 @@ TGBot RSS 使用 SQLite 数据库存储数据，包含以下表：
 ## 联系方式
 
 - 问题反馈：https://t.me/IonMagic
-- 项目仓库：https://github.com/IonRh/TGBot_RSS 
+- 项目仓库：https://github.com/IonRh/TGBot_RSS
+  
+<a href="https://github.com/IonRh/TGBot_RSS/stargazers" target="_blank" style="display: block" align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=IonRh/TGBot_RSS&type=Timeline&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=IonRh/TGBot_RSS&type=Timeline" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=IonRh/TGBot_RSS&type=Timeline" />
+  </picture>
+</a>
