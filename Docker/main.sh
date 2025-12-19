@@ -20,4 +20,4 @@ else
     ./TGBot_RSS > /dev/null 2>&1 &
 fi
 
-tail -f /dev/null
+tail -F /root/bot.log
