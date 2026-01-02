@@ -50,8 +50,8 @@ jobs:
       # 拷贝 config.json 并打包为 tar.gz（路径改为 TGRSSBot/config.json）
       - name: Package binaries with config.json
         run: |
-          cp TGRSSBot/config.json dist/
-          cd dist
+          cp TGRSSBot/config.json TGRSSBot/dist/
+          cd TGRSSBot/dist
           mv TGBot-linux-amd64 TGBot_RSS && tar -czvf TGBot-linux-amd64.tar.gz TGBot_RSS config.json && rm TGBot_RSS
           mv TGBot-linux-arm64 TGBot_RSS && tar -czvf TGBot-linux-arm64.tar.gz TGBot_RSS config.json && rm TGBot_RSS
           mv TGBot-linux-armv7 TGBot_RSS && tar -czvf TGBot-linux-armv7.tar.gz TGBot_RSS config.json && rm TGBot_RSS
@@ -64,10 +64,10 @@ jobs:
           sha256sum TGBot-*.tar.gz > checksums.txt
 
       # 创建或更新 Git 标签
-      - name: Create or update tag
+      - name: Generate checksums
         run: |
-          git tag -f ${{ github.event.inputs.tag }}
-          git push origin -f ${{ github.event.inputs.tag }}
+          cd TGRSSBot/dist
+          sha256sum TGBot-*.tar.gz > checksums.txt
 
       # 创建 Release 并上传文件
       - name: Create Release
@@ -75,10 +75,10 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.tag }}
           files: |
-            dist/TGBot-linux-amd64.tar.gz
-            dist/TGBot-linux-arm64.tar.gz
-            dist/TGBot-linux-armv7.tar.gz
-            dist/checksums.txt
+            TGRSSBot/dist/TGBot-linux-amd64.tar.gz
+            TGRSSBot/dist/TGBot-linux-arm64.tar.gz
+            TGRSSBot/dist/TGBot-linux-armv7.tar.gz
+            TGRSSBot/dist/checksums.txt
           body: ${{ github.event.inputs.release_notes }}
           generate_release_notes: false
         env:
