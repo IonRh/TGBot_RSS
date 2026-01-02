@@ -110,6 +110,14 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
    - 普通关键词：`科技`
    - 通配符匹配：`科技*新闻`（匹配"科技最新新闻"等）
    - 屏蔽关键词：`-广告`（屏蔽包含"广告"的内容）
+   - #t 关键词 - 只匹配标题
+   - #c 关键词 - 只匹配描述内容
+   - #a 关键词 - 匹配标题和描述
+   - 示例：#t技术  只在标题中匹配"技术"
+   - 示例：#c新闻  只在描述中匹配"新闻"
+   - 示例：#a科技  在标题和描述中都匹配"科技"
+   - 示例：技术+科技新闻  只匹配名为"科技新闻"的RSS源
+  
 ![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20223348.png)
 ### 查看和删除
 
