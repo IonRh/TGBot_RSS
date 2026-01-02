@@ -1,0 +1,81 @@
+name: Build and Release Go Binary
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name for the release (e.g., v1.0.0)'
+        required: true
+      release_notes:
+        description: 'Release notes or changelog for this version'
+        required: false
+        default: ''
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 在 Docker 容器中构建 Linux 二进制
+      - name: Build Linux binaries in Docker
+        run: |
+          docker run --rm -v $(pwd)/TGRSSBot:/go/src/app -w /go/src/app golang:1.24-bullseye /bin/bash -c "
+            set -e;
+            apt-get update && apt-get install -y --no-install-recommends git ca-certificates zip \
+            gcc g++ gcc-aarch64-linux-gnu g++-aarch64-linux-gnu gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf && \
+            apt-get clean && \
+            mkdir -p dist && \
+            CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC=gcc go build -o dist/TGBot-linux-amd64 -ldflags='-w -s' *.go && \
+            CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/TGBot-linux-arm64 -ldflags='-w -s' *.go && \
+            CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 CC=arm-linux-gnueabihf-gcc go build -o dist/TGBot-linux-armv7 -ldflags='-w -s' *.go && \
+            chown -R $(id -u):$(id -g) dist
+          "
+
+      # 修复权限
+      - name: Fix permissions
+        run: |
+          sudo chown -R $USER:$USER dist
+          chmod -R u+rw dist
+
+      # 拷贝 config.json 并打包为 tar.gz
+      - name: Package binaries with config.json
+        run: |
+          cp config.json dist/
+          cd dist
+          mv TGBot-linux-amd64 TGBot_RSS && tar -czvf TGBot-linux-amd64.tar.gz TGBot_RSS config.json && rm TGBot_RSS
+          mv TGBot-linux-arm64 TGBot_RSS && tar -czvf TGBot-linux-arm64.tar.gz TGBot_RSS config.json && rm TGBot_RSS
+          mv TGBot-linux-armv7 TGBot_RSS && tar -czvf TGBot-linux-armv7.tar.gz TGBot_RSS config.json && rm TGBot_RSS
+          rm config.json
+
+      # 计算校验和
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum TGBot-*.tar.gz > checksums.txt
+
+      # 创建或更新 Git 标签
+      - name: Create or update tag
+        run: |
+          git tag -f ${{ github.event.inputs.tag }}
+          git push origin -f ${{ github.event.inputs.tag }}
+      # 创建 Release 并上传二进制文件
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          repository: ${{ github.repository }}
+          files: |
+            dist/TGBot-linux-amd64.tar.gz
+            dist/TGBot-linux-arm64.tar.gz
+            dist/TGBot-linux-armv7.tar.gz
+            dist/checksums.txt
+          body: ${{ github.event.inputs.release_notes }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
