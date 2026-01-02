@@ -204,14 +204,18 @@ func updateLastTime(db *sql.DB, rssName string, updateTime time.Time, title stri
 }
 
 // 检查消息是否匹配关键词，返回匹配到的关键词列表
-func matchesKeywords(msg Message, keywords []string) []string {
+func matchesKeywords(msg Message, keywords []string, rssName string) []string {
 	if len(keywords) == 0 {
 		return nil
 	}
 
 	var matchedKeywords []string
 	var blockedKeywords []string
-	content := strings.ToLower(msg.Title + " " + msg.Description)
+
+	// 准备不同的匹配内容
+	titleContent := strings.ToLower(msg.Title)
+	descContent := strings.ToLower(msg.Description)
+	allContent := strings.ToLower(msg.Title + " " + msg.Description)
 
 	// 首先检查是否命中屏蔽词
 	for _, keyword := range keywords {
@@ -219,6 +223,7 @@ func matchesKeywords(msg Message, keywords []string) []string {
 		if keyword == "" {
 			continue
 		}
+
 		// 检查是否是屏蔽关键词
 		isBlockKeyword := strings.HasPrefix(keyword, "-")
 		if isBlockKeyword {
@@ -226,8 +231,64 @@ func matchesKeywords(msg Message, keywords []string) []string {
 			//fmt.Println("屏蔽关键词:", keyword)
 		}
 
+		// 检查匹配范围前缀 (#t=标题, #c=描述, #a=全部)
+		var matchScope string = "default" // default表示只匹配标题（保持向后兼容）
+		var processedKeyword string = keyword
+
+		if strings.HasPrefix(keyword, "#t") {
+			matchScope = "title"
+			processedKeyword = strings.TrimPrefix(keyword, "#t")
+		} else if strings.HasPrefix(keyword, "#c") {
+			matchScope = "description"
+			processedKeyword = strings.TrimPrefix(keyword, "#c")
+		} else if strings.HasPrefix(keyword, "#a") {
+			matchScope = "all"
+			processedKeyword = strings.TrimPrefix(keyword, "#a")
+		}
+
+		// 移除前缀后可能存在的空格
+		processedKeyword = strings.TrimSpace(processedKeyword)
+
+		// 检查是否包含RSS名称限制 (格式: 关键词+rssname)
+		var actualKeyword string
+		var targetRSSName string
+		hasRSSFilter := false
+
+		if strings.Contains(processedKeyword, "+") {
+			parts := strings.Split(processedKeyword, "+")
+			if len(parts) == 2 {
+				actualKeyword = strings.TrimSpace(parts[0])
+				targetRSSName = strings.TrimSpace(parts[1])
+				hasRSSFilter = true
+			} else {
+				actualKeyword = processedKeyword // 如果格式不正确，使用处理后的关键词
+			}
+		} else {
+			actualKeyword = processedKeyword
+		}
+
+		// 如果指定了RSS名称过滤，检查当前RSS是否匹配
+		if hasRSSFilter {
+			if strings.ToLower(rssName) != strings.ToLower(targetRSSName) {
+				continue // RSS名称不匹配，跳过此关键词
+			}
+		}
+
 		// 将关键词转为小写
-		lowerKeyword := strings.ToLower(keyword)
+		lowerKeyword := strings.ToLower(actualKeyword)
+
+		// 根据匹配范围选择要匹配的内容
+		var targetContent string
+		switch matchScope {
+		case "title":
+			targetContent = titleContent
+		case "description":
+			targetContent = descContent
+		case "all":
+			targetContent = allContent
+		default: // 保持向后兼容，默认只匹配标题
+			targetContent = titleContent
+		}
 
 		// 检查是否包含通配符
 		if strings.Contains(lowerKeyword, "*") {
@@ -238,22 +299,22 @@ func matchesKeywords(msg Message, keywords []string) []string {
 
 			// 编译正则表达式
 			re, err := regexp.Compile(pattern)
-			if err == nil && re.MatchString(content) {
+			if err == nil && re.MatchString(targetContent) {
 				if isBlockKeyword {
-					blockedKeywords = append(blockedKeywords, keyword)
+					blockedKeywords = append(blockedKeywords, actualKeyword)
 				} else {
-					matchedKeywords = append(matchedKeywords, keyword)
+					matchedKeywords = append(matchedKeywords, actualKeyword)
 				}
 				continue
 			}
 		}
 
 		// 如果没有通配符或正则表达式失败，使用普通匹配
-		if strings.Contains(content, lowerKeyword) {
+		if strings.Contains(targetContent, lowerKeyword) {
 			if isBlockKeyword {
-				blockedKeywords = append(blockedKeywords, keyword)
+				blockedKeywords = append(blockedKeywords, actualKeyword)
 			} else {
-				matchedKeywords = append(matchedKeywords, keyword)
+				matchedKeywords = append(matchedKeywords, actualKeyword)
 			}
 		}
 	}
@@ -290,9 +351,9 @@ func processSubscription(db *sql.DB, sub Subscription, userKeywords map[int64][]
 		for _, userID := range sub.Users {
 			keywords := userKeywords[userID]
 			if len(keywords) == 0 {
-				continue // 用户没有设置关键词且不是全量推送，跳过
+				continue
 			}
-			matchedKeywords := matchesKeywords(msg, keywords)
+			matchedKeywords := matchesKeywords(msg, keywords, sub.Name)
 
 			// 如果匹配到关键词或是全量推送，则发送消息
 			if len(matchedKeywords) > 0 {
@@ -319,9 +380,8 @@ func processSubscription(db *sql.DB, sub Subscription, userKeywords map[int64][]
 
 				// 格式化时间
 				formattedDate := msg.PubDate.In(time.FixedZone("CST", 8*60*60)).Format("2006-01-02 15:04:05")
-				var otherpush string
 				// 构造HTML消息
-				var htmlMessage string
+				var htmlMessage, otherpush string
 				if sub.Channel == 1 {
 					imageURL := extractImageURL(description)
 					cleanDescription := cleanHTMLContent(description)

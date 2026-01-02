@@ -377,24 +377,42 @@ func (m *MessageSender) SendResponse(userID int64, messageID int, text string, k
 }
 
 // SendHTMLResponse 发送HTML格式的消息
-func (m *MessageSender) SendHTMLResponse(userID int64, messageID int, text string, keyboard *tgbotapi.InlineKeyboardMarkup) error {
+func (m *MessageSender) SendHTMLResponse(userID int64, messageID int, text string, keyboard *tgbotapi.InlineKeyboardMarkup, disablePreview ...bool) error {
+	logMessage("debug", fmt.Sprintf("SendHTMLResponse: messageID=%d, textLen=%d", messageID, len(text)), userID)
+
+	// 处理可选的 disablePreview 参数，默认为 false（显示预览）
+	shouldDisablePreview := false
+	if len(disablePreview) > 0 {
+		shouldDisablePreview = disablePreview[0]
+	}
+
 	if messageID > 0 {
 		// 编辑现有消息
 		edit := tgbotapi.NewEditMessageText(userID, messageID, text)
 		edit.ParseMode = "HTML"
+		edit.DisableWebPagePreview = shouldDisablePreview
 		if keyboard != nil {
 			edit.ReplyMarkup = keyboard
 		}
+		logMessage("debug", "准备编辑消息", userID)
 		_, err := m.bot.Send(edit)
+		if err != nil {
+			logMessage("error", fmt.Sprintf("编辑消息失败: %v", err), userID)
+		}
 		return err
 	} else {
 		// 发送新消息
 		msg := tgbotapi.NewMessage(userID, text)
 		msg.ParseMode = "HTML"
+		msg.DisableWebPagePreview = shouldDisablePreview
 		if keyboard != nil {
 			msg.ReplyMarkup = *keyboard
 		}
+		logMessage("debug", "准备发送新消息", userID)
 		_, err := m.bot.Send(msg)
+		if err != nil {
+			logMessage("error", fmt.Sprintf("发送新消息失败: %v", err), userID)
+		}
 		return err
 	}
 }
@@ -534,7 +552,7 @@ func (h *UserActionHandler) handleKeywordAction(userID int64, messageID int, act
 	switch action {
 	case "add_prompt":
 		setUserState(userID, "add_keyword", messageID, nil)
-		text := "请输入要添加的关键词，多个关键词可用空格、逗号(,)或中文逗号(，)分隔：\n\n💡 提示：关键词将用于过滤RSS内容"
+		text := "请输入要添加的关键词，多个关键词可用逗号分隔：\n\n💡 技巧：可使用(*)或者(-)进行过滤匹配\n * 可匹配任意字符，-关键词 表示屏蔽\n示例：你*帅*   可匹配 你好帅呀！\n示例：-不喜欢  可屏蔽包含 不喜欢 的内容\n\n💡 匹配范围：可使用前缀指定匹配范围\n#t 关键词 - 只匹配标题\n#c 关键词 - 只匹配描述内容\n#a 关键词 - 匹配标题和描述\n示例：#t技术  只在标题中匹配\"技术\"\n示例：#c新闻  只在描述中匹配\"新闻\"\n示例：#a科技  在标题和描述中都匹配\"科技\"\n\n💡 RSS过滤：可使用(+)指定RSS源\n示例：技术+科技新闻  只匹配名为\"科技新闻\"的RSS源\n示例：技术  匹配所有RSS源\n\n💡 提示：全推送可用*号"
 		keyboard := CreateBackButton()
 		h.sender.SendResponse(userID, messageID, text, &keyboard)
 
@@ -577,7 +595,7 @@ func (h *UserActionHandler) handleSubscriptionAction(userID int64, messageID int
 ⚠️ 频道需要先转为rss才可添加
 请按以下格式输入RSS订阅信息：
 
-URL 名称 TG频道用0常规用1
+URL 名称 TG频道用1常规用0
 
 📝 示例：
 常规订阅：https://example.com/feed 科技新闻 0
@@ -589,7 +607,7 @@ URL 名称 TG频道用0常规用1
 		//fmt.Println(data[0])
 		//fmt.Println(data[1])
 		if len(data) < 3 {
-			h.sender.SendError(userID, messageID, "❌ 格式错误！请按照以下格式输入：\nURL 名称 TG频道用0常规用1\n例如：https://example.com/feed 科技新闻 0")
+			h.sender.SendError(userID, messageID, "❌ 格式错误！请按照以下格式输入：\nURL 名称 TG频道用1常规用0\n例如：https://example.com/feed 科技新闻 0")
 			return
 		}
 
@@ -636,7 +654,8 @@ func (h *UserActionHandler) viewKeywords(userID int64, messageID int) {
 
 	sort.Strings(keywords)
 	text := h.formatKeywordsList(keywords)
-	h.sender.HandleLongText(userID, messageID, text, true)
+	keyboard := CreateBackButton()
+	h.sender.SendHTMLResponse(userID, messageID, text, &keyboard)
 }
 
 func (h *UserActionHandler) showDeleteKeywords(userID int64, messageID int) {
@@ -715,7 +734,8 @@ func (h *UserActionHandler) viewSubscriptions(userID int64, messageID int) {
 	}
 
 	text := h.formatSubscriptionsList(subscriptions)
-	h.sender.HandleLongText(userID, messageID, text, true)
+	keyboard := CreateBackButton()
+	h.sender.SendHTMLResponse(userID, messageID, text, &keyboard)
 }
 
 func (h *UserActionHandler) showDeleteSubscriptions(userID int64, messageID int) {
@@ -767,7 +787,7 @@ func (h *UserActionHandler) formatKeywordsList(keywords []string) string {
 	var currentRow []string
 
 	for i, kw := range keywords {
-		currentRow = append(currentRow, fmt.Sprintf("%d.%s", i+1, kw))
+		currentRow = append(currentRow, fmt.Sprintf("%d.<code>%s</code>", i+1, kw))
 		if i == len(keywords)-1 {
 			rows = append(rows, strings.Join(currentRow, "  "))
 		}
@@ -779,7 +799,7 @@ func (h *UserActionHandler) formatKeywordsList(keywords []string) string {
 func (h *UserActionHandler) formatSubscriptionsList(subscriptions []SubscriptionInfo) string {
 	var subList []string
 	for i, sub := range subscriptions {
-		subList = append(subList, fmt.Sprintf("%d. 📰 %s\n   🔗 %s", i+1, sub.Name, sub.URL))
+		subList = append(subList, fmt.Sprintf("订阅%d.<code>%s</code>\n%s", i+1, sub.Name, sub.URL))
 	}
 	return fmt.Sprintf("📰 你的订阅列表（共 %d 个）：\n\n%s", len(subscriptions), strings.Join(subList, "\n"))
 }
@@ -810,8 +830,8 @@ func main() {
 `
 	intro := fmt.Sprintf(`%s
 欢迎使用 TG RSS Bot
-版本: v1.0.0
-构建时间: 2025-06-06
+版本: v1.0.1
+构建时间: 2025-07-08
 作者: AbBai (阿布白)
 源码仓库: https://github.com/IonRh/TGBot_RSS
 简介: TGBot_RSS 是一个灵活的利用TGBot信息推送订阅RSS的工具。
@@ -1012,18 +1032,36 @@ func showHelp(userID int64, messageID int) {
 	count := downloadcounnt()
 	helpText := fmt.Sprintf(`🤖 RSS订阅机器人
 📰 TGBot_RSS 当前下载：%d 次
-📝 使用技巧：
-● 关键词支持中英文，可用中、英逗号(,)分隔多个关键词
-● 可使用正则表达式进行高级匹配
-● *可匹配任意字符，-关键词 表示屏蔽关键词
-● 示例：你*帅*   可匹配 "你好帅呀！" 等
-● 示例：-不喜欢  可屏蔽包含 "不喜欢" 的内容
+
+📝 <b>使用帮助（不推送可尝试以下方式解决）</b>
+
+🔤 <b>关键词基础</b>
+• 支持中英文，可用逗号(,)分隔多个关键词
+• 可使用正则表达式进行高级匹配
+
+🎯 <b>高级匹配</b>
+• <code>*</code> 可匹配任意字符
+• <code>-关键词</code> 表示屏蔽关键词
+• 示例：<code>你*帅*</code> 可匹配 "你好帅呀！" 等
+• 示例：<code>-你好丑</code> 可屏蔽包含 "你好丑" 的内容
+
+🎯 <b>匹配范围</b>
+• 默认只匹配标题，如需更精确控制可使用以下前缀：
+• #t 关键词 - 只匹配标题
+• #c 关键词 - 只匹配描述内容
+• #a 关键词 - 匹配标题和描述
+• 示例：<code>#t技术</code> 只在标题中匹配"技术"
+
+📡 <b>RSS过滤(可配合高级匹配使用)</b>
+• <code>关键词+RSS名称</code> 只匹配指定RSS源
+• 示例：<code>技术+科技新闻</code> 只匹配名为 "科技新闻" 的RSS源
+• 不加"+RSS名称"则匹配所有订阅源
 
 📦 源码仓库: github.com/IonRh/TGBot_RSS
 🔧 问题反馈: https://t.me/IonMagic`, count)
 
 	keyboard := CreateBackButton()
-	messageSender.SendResponse(userID, messageID, helpText, &keyboard)
+	messageSender.SendHTMLResponse(userID, messageID, helpText, &keyboard, true)
 }
 
 // handleCommand 处理命令消息
