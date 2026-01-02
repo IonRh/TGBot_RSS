@@ -118,7 +118,8 @@ curl -sL https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/T
    - 示例：#a科技  在标题和描述中都匹配"科技"
    - 示例：技术+科技新闻  只匹配名为"科技新闻"的RSS源
   
-![image](https://ghproxy.badking.pp.ua/https://raw.githubusercontent.com/IonRh/TGBot_RSS/main/Image/2025-06-06%20223348.png)
+<img width="511" height="383" alt="image" src="https://github.com/user-attachments/assets/33a64398-4229-4c84-bf23-2333dd83d844" />
+
 ### 查看和删除
 
 - 点击 "📋 查看关键词" 或 "📰 查看订阅" 可以查看已添加的内容
