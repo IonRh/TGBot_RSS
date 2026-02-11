@@ -18,6 +18,5 @@ else
     sed -i "s/\"Debug\": \(true\|false\)/\"Debug\": $Debug/g" config.json
     sed -i "s#\"ProxyURL\": \".*\"#\"ProxyURL\": \"$ProxyURL\"#g" config.json
     sed -i "s#\"Pushinfo\": \".*\"#\"Pushinfo\": \"$Pushinfo\"#g" config.json
-    ./TGBot_RSS > /dev/null 2>&1 &
-	tail -f /dev/null
+    ./TGBot_RSS
 fi
