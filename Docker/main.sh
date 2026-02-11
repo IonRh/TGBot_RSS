@@ -4,6 +4,7 @@ export TZ='Asia/Shanghai'
 
 # 检查/root是否有config.json文件
 if [ -f /root/config.json ]; then
+    cp -f /app/TGBot_RSS /root/TGBot_RSS
     # 有文件则执行TGBot_RSS
     cd /root
 	./TGBot_RSS
