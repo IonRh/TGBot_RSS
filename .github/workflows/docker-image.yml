@@ -1,6 +1,9 @@
 name: "Build and push images"
 
 on:
+  release:
+    types: [published]          # 只有点击 "Publish release" 或通过 API 正式发布时触发
+  # 可选：也允许手动触发测试
   workflow_dispatch:
 
 jobs:

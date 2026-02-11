@@ -20,6 +20,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// 版本信息变量，可以通过 -ldflags 在构建时设置
+var (
+	version   = "v1.0.0"     // 版本号
+	buildTime = "2025-05-07" // 构建时间
+	gitCommit = "unknown"    // Git提交哈希(可选)
+)
+
 // Config 应用配置结构体
 // 从config.json文件中加载配置信息
 type Config struct {
@@ -830,12 +837,12 @@ func main() {
 `
 	intro := fmt.Sprintf(`%s
 欢迎使用 TG RSS Bot
-版本: v1.0.1
-构建时间: 2025-07-08
+版本: %s
+构建时间: %s
 作者: AbBai (阿布白)
 源码仓库: https://github.com/IonRh/TGBot_RSS
 简介: TGBot_RSS 是一个灵活的利用TGBot信息推送订阅RSS的工具。
-探索更多：https://github.com/IonRh`, asciiArt)
+探索更多：https://github.com/IonRh`, asciiArt, version, buildTime)
 	logMessage("info", fmt.Sprintf(intro+"\n"))
 	// 初始化日志系统
 	logMessage("info", "RSS Bot 启动中...")
