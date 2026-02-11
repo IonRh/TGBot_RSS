@@ -26,6 +26,18 @@ jobs:
       # 在 Docker 容器中构建 Linux 二进制（关键：容器内直接修复权限）
       - name: Build Linux binaries in Docker
         run: |
+          # 获取构建时间和Git提交信息
+          BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S_UTC')
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          VERSION=${{ github.event.inputs.tag }}
+          
+          echo "Building with:"
+          echo "  Version: $VERSION"
+          echo "  Build Time: $BUILD_TIME"
+          echo "  Git Commit: $GIT_COMMIT"
+          
+          LDFLAGS="-w -s -X 'main.version=${VERSION}' -X 'main.buildTime=${BUILD_TIME}' -X 'main.gitCommit=${GIT_COMMIT}'"
+          echo "LDFLAGS: $LDFLAGS"
           docker run --rm \
             -v $(pwd)/TGRSSBot:/go/src/app \
             -w /go/src/app \
@@ -39,9 +51,9 @@ jobs:
               && apt-get clean
               
               mkdir -p dist
-              CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC=gcc go build -o dist/TGBot-linux-amd64 -ldflags='-w -s' *.go
-              CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/TGBot-linux-arm64 -ldflags='-w -s' *.go
-              CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 CC=arm-linux-gnueabihf-gcc go build -o dist/TGBot-linux-armv7 -ldflags='-w -s' *.go
+              CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC=gcc go build -o dist/TGBot-linux-amd64 -ldflags='$LDFLAGS' *.go
+              CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/TGBot-linux-arm64 -ldflags='$LDFLAGS' *.go
+              CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 CC=arm-linux-gnueabihf-gcc go build -o dist/TGBot-linux-armv7 -ldflags='$LDFLAGS' *.go
               
               # 关键：用宿主机用户 UID/GID 修复权限，避免后续无法访问
               chown -R $(id -u):$(id -g) dist
